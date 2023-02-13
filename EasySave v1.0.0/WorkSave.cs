@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EasySave_v1._0._0
 {/// <summary>
-/// Abtract calss for the complete and the differential Save
+/// Abtract class for the complete and the differential Save
 /// </summary>
     abstract class WorkSave
     {
