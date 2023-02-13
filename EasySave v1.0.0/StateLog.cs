@@ -38,7 +38,7 @@ namespace EasySave_v1._0._0
             LogState = state;
             TotalFilesToCopy = FileLeft(SourceFilePath);
             TotalFileLeft = FileLeft(SourceFilePath) - 1;
-            NbFileTodo = FileLeft(SourceFilePath);
+            NbFileTodo = FileLeft(SourceFilePath)-1;
             Progression = 1;
         }
 
@@ -69,9 +69,8 @@ namespace EasySave_v1._0._0
 
             StreamWriter file = File.CreateText(DESTPATH);
             using (JsonTextWriter writer = new JsonTextWriter(file))
-            {
+            
                 DataForLog.WriteTo(writer);
-            }
 
         }
 
