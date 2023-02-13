@@ -1,21 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Diagnostics;
-using EasySave_v1._0._0;
 
-namespace EasySave.Model
+namespace EasySave_v1._0._0
 {
     class Complete : WorkSave
     {
+        #region Constructors
         public Complete(string Name, string BaseDirectory, string TargetDirectory, bool Type) : base(Name, BaseDirectory, TargetDirectory, Type) { }
 
+        #endregion Constructors
+
+        #region Methods
         public void completeSave(bool typeFichier)
         {
-       
+
             //if type is false then it is file
-            if (typeFichier == false)
+            if (!typeFichier)
             {
 
                 Stopwatch stopwatch = new Stopwatch();
@@ -53,18 +54,7 @@ namespace EasySave.Model
 
         }
 
-        public long GetDirectorySize(string directoryPath)
-        {
-            long size = 0;
-
-            DirectoryInfo directoryInfo = new DirectoryInfo(directoryPath);
-
-            foreach (FileInfo file in directoryInfo.GetFiles("*.*,", SearchOption.AllDirectories))
-            {
-                size += file.Length;
-            }
-            return size;
-        }
+        #endregion Methods
 
     }
 }
