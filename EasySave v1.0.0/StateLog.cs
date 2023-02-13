@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
 using static EasySave_v1._0._0.Enums;
@@ -16,23 +17,24 @@ namespace EasySave_v1._0._0
         #region Properties
         public string Name { get; set; }
         public string SourceFilePath { get; set; }
-        public string TargetFilePath { get; set; }        
+        public string TargetFilePath { get; set; }
         public string LogState { get; set; }
         public int TotalFilesToCopy { get; set; }
         public int TotalFileLeft { get; set; }
         public int NbFileTodo { get; set; }
         public int Progression { get; set; }
+        public readonly string LOGDESTPATH = "C:/EasySaveLog/state.";
 
         public readonly string DESTPATH = Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/state.json");
         #endregion Properties
 
         #region Constructors
 
-        public StateLog(string name, string sourcefilepath,string targetfilepath, string state, int totalfilestocopy , int totalfilesleft, int nbFilesToDo, int progression)
+        public StateLog(string name, string sourcefilepath, string targetfilepath, string state, int totalfilestocopy, int totalfilesleft, int nbFilesToDo, int progression)
         {
             Name = name;
-            SourceFilePath= sourcefilepath;
-            TargetFilePath= targetfilepath;
+            SourceFilePath = sourcefilepath;
+            TargetFilePath = targetfilepath;
             LogState = state;
             TotalFilesToCopy = totalfilestocopy;
             TotalFileLeft = totalfilesleft;
@@ -48,51 +50,58 @@ namespace EasySave_v1._0._0
 
         #region Methods
 
-        public void PrepareWriteLog(JArray DataForLog,string extension)
+        public void PrepareWriteLogJSON(JArray DataForLog)
         {
-            if (extension == EXTENSION.JSON.ToString())
+
+            if (!Directory.Exists(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/")))
             {
-                if (!Directory.Exists(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/")))
-                {
-                    Directory.CreateDirectory(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/"));
-                }
-                else
-                {
-                    if (!File.Exists("C:/EasySaveLog/state.json"))
-                    {
-                        File.Create("C:/EasySaveLog/state.json");
-                    }
-                }
-
-                File.WriteAllText(DESTPATH, DataForLog.ToString());
-
-                StreamWriter file = File.CreateText(DESTPATH);
-                using (JsonTextWriter writer = new JsonTextWriter(file))
-                {
-                    DataForLog.WriteTo(writer);
-                }
-            }else if (extension == EXTENSION.XML.ToString())
-            {
-                if (!Directory.Exists(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/")))
-                {
-                    Directory.CreateDirectory(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/"));
-                }
-                else
-                {
-                    if (!File.Exists("C:/EasySaveLog/state.XML"))
-                    {
-                        File.Create("C:/EasySaveLog/state.XML");
-                    }
-                }
-
-                File.WriteAllText(DESTPATH, DataForLog.ToString());
-
-                StreamWriter file = File.CreateText(DESTPATH);
-                XmlTextWriter writer = new XmlTextWriter(file);
-                
-                    //DataForLog.WriteTo(writer);
-                
+                Directory.CreateDirectory(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/"));
             }
+            else
+            {
+                if (!File.Exists("C:/EasySaveLog/state.json"))
+                {
+                    File.Create("C:/EasySaveLog/state.json");
+                }
+            }
+
+            File.WriteAllText(DESTPATH, DataForLog.ToString());
+
+            StreamWriter file = File.CreateText(DESTPATH);
+            using (JsonTextWriter writer = new JsonTextWriter(file))
+            {
+                DataForLog.WriteTo(writer);
+            }
+
+        }
+
+        public void PrepareWriteLogXML(XmlDocument DataForLog)
+        {
+
+            if (!Directory.Exists(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/")))
+            {
+                Directory.CreateDirectory(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/"));
+            }
+            else
+            {
+                if (!File.Exists("C:/EasySaveLog/state.XML"))
+                {
+                    File.Create("C:/EasySaveLog/state.XML");
+                }
+            }
+            FileStream fileStream = File.Open(LOGDESTPATH + "xml", FileMode.Open, FileAccess.Write);
+
+            // Crée un flux d'écriture pour écrire dans le fichier
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            XmlWriter xmlWriter = XmlWriter.Create(fileStream, settings);
+
+            DataForLog.Save(xmlWriter);
+
+            // Ferme le flux d'écriture et le fichier
+            xmlWriter.Close();
+            fileStream.Close();
+
         }
 
         public void GenerateLogEtatJSON()
@@ -100,36 +109,39 @@ namespace EasySave_v1._0._0
 
             JObject DataForLog = new JObject(new JProperty("Name", this.Name), new JProperty("SourceFilePath", this.SourceFilePath), new JProperty("TargetFilePath", this.TargetFilePath), new JProperty("State", this.LogState), new JProperty("TotalFilesToCopy", this.TotalFilesToCopy), new JProperty("TotalFileLeft", this.TotalFileLeft), new JProperty("NbFilesLeftToDo", this.NbFileTodo), new JProperty("Progression", this.Progression));
             JArray array = new JArray(DataForLog);
-            PrepareWriteLog(array,EXTENSION.JSON.ToString());
+            PrepareWriteLogJSON(array);
         }
 
-     /*   public void GenerateLogEtatXML()
+        public void GenerateLogEtatXML(XmlDocument DataforLog)
         {
+            XmlDocument document = new XmlDocument();
 
-            List<Dictionary<string, object>> logData = new List<Dictionary<string, object>>();
-            // Add data to the list of dictionaries representing each log entry
+            // Créer le noeud racine
+            XmlElement root = document.CreateElement("DailyLog");
+            document.AppendChild(root);
 
-            // Create the root element
-            XElement logElement = new XElement("Log");
+            // Créer le noeud DataForLog dans un document XML différent
+            XmlDocument tempDoc = new XmlDocument();
+            XmlElement DataForLog = tempDoc.CreateElement("DailyLog");
+            DataForLog.AppendChild(tempDoc.CreateElement("Name")).InnerText = this.Name;
+            DataForLog.AppendChild(tempDoc.CreateElement("SourceFilePath")).InnerText = this.SourceFilePath;
+            DataForLog.AppendChild(tempDoc.CreateElement("TargetFilePath")).InnerText = this.TargetFilePath;
+            DataForLog.AppendChild(tempDoc.CreateElement("LogState")).InnerText = this.LogState;
+            DataForLog.AppendChild(tempDoc.CreateElement("TotalFilesToCopy")).InnerText = this.TotalFilesToCopy.ToString();
+            DataForLog.AppendChild(tempDoc.CreateElement("TotalFileLeft")).InnerText = this.TotalFileLeft.ToString();
+            DataForLog.AppendChild(tempDoc.CreateElement("NbFileTodo")).InnerText = this.NbFileTodo.ToString();
+            DataForLog.AppendChild(tempDoc.CreateElement("Progression")).InnerText = this.Progression.ToString();
 
-            // Create a child element for each log entry
-            foreach (Dictionary<string, object> entry in logData)
-            {
-                XElement copyJobElement = new XElement("CopyJob");
-                copyJobElement.Add(new XElement("Name", entry["Name"]));
-                copyJobElement.Add(new XElement("SourceFilePath", entry["SourceFilePath"]));
-                copyJobElement.Add(new XElement("TargetFilePath", entry["TargetFilePath"]));
-                copyJobElement.Add(new XElement("State", entry["State"]));
-                copyJobElement.Add(new XElement("TotalFilesToCopy", entry["TotalFilesToCopy"]));
-                copyJobElement.Add(new XElement("TotalFileLeft", entry["TotalFileLeft"]));
-                copyJobElement.Add(new XElement("NbFilesLeftToDo", entry["NbFilesLeftToDo"]));
-                copyJobElement.Add(new XElement("Progression", entry["Progression"]));
-                logElement.Add(copyJobElement);
-            }
+            // Importer le noeud DataForLog dans le document XML principal
+            XmlNode importedNode = document.ImportNode(DataForLog, true);
+            root.AppendChild(importedNode);
+
+            PrepareWriteLogXML(document);
+
         }
-*/
+
         public int FileLeft(string destination)
-        { 
+        {
             int nbFichiers = Directory.GetFiles(destination, "*.*", SearchOption.AllDirectories).Length;
             TotalFilesToCopy = nbFichiers;
             TotalFileLeft = nbFichiers - 1;
