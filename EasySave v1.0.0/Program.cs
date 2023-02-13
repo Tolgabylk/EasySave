@@ -11,9 +11,9 @@ namespace EasySave_v1._0._0
             StateLog c = new StateLog("Test", @"C:\\EasySaveLog", @"C:\\","test");
             /*c.GenerateLogEtatJSON();
             Console.WriteLine("test");*/
-            DailyLog d = new DailyLog("test", "test", "test", "test", 333, 10101901);
-            DailyLog g = new DailyLog("test", "test", "test", "test", 10000, 10101901);
+            DailyLog d = new DailyLog("test", @"C:\\EasySaveLog", @"C:\\", "test");
 
+            d.GenerateLogDailyXML();
             c.GenerateLogEtatJSON();
 
             Console.Read();

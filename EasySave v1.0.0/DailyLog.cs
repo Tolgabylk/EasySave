@@ -19,8 +19,8 @@ namespace EasySave_v1._0._0
         public string FileSource { get; set; }
         public string FileTarget { get; set; }
         public string DesthPath { get; set; }
-        public int FileSize { get; set; }
-        public int FileTransferTime { get; set; }
+        public long FileSize { get; set; }
+        public double FileTransferTime { get; set; }
 
         //Readonly properties
         public readonly string TIME = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
@@ -31,15 +31,15 @@ namespace EasySave_v1._0._0
         #endregion Properties 
 
         #region Constructors
-        public DailyLog(string name, string fileSource, string fileTarget, string desthPath, int fileSize, int fileTransferTime)
+        public DailyLog(string name, string fileSource, string fileTarget, string desthPath)
         {
             Name = name;
             FileSource = fileSource;
             FileTarget = fileTarget;
             DesthPath = desthPath;
-            FileSize = fileSize;
-            FileTransferTime = fileTransferTime;
-
+            FileSize = GetDirectorySize(fileSource);
+            FileTransferTime = CalculerTempsTransfert(FileSource, FileTarget,100000);
+            
         }
 
         public DailyLog() { }
@@ -135,6 +135,40 @@ namespace EasySave_v1._0._0
                 }
             }
 
+        }
+
+        public static long GetDirectorySize(string path)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(path);
+
+            long size = 0;
+            FileInfo[] files = directoryInfo.GetFiles();
+
+            foreach (FileInfo file in files)
+            {
+                size += file.Length;
+            }
+
+            return size;
+        }
+        public static double CalculerTempsTransfert(string dossierSource, string dossierDestination, double vitesseTransfert)
+        {
+            // Calculer la taille du dossier source
+            DirectoryInfo di = new DirectoryInfo(dossierSource);
+            FileInfo[] fichiers = di.GetFiles("*", SearchOption.AllDirectories);
+            long taille = 0;
+            foreach (FileInfo fichier in fichiers)
+            {
+                taille += fichier.Length;
+            }
+
+            // Convertir la vitesse de transfert en octets par seconde
+            double vitesseOctetsParSeconde = vitesseTransfert * 1000000 / 8;
+
+            // Calculer le temps de transfert en secondes
+            double tempsTransfert = taille / vitesseOctetsParSeconde;
+
+            return tempsTransfert;
         }
 
         #endregion Methods
