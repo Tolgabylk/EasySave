@@ -94,7 +94,7 @@ namespace EasySave_v1._0._0
                 }
             }
 
-            File.WriteAllText(DESTPATH, DataForLog.ToString());
+            File.WriteAllText(LOGDESTPATH + "json", DataForLog.ToString());
 
             StreamWriter file = File.CreateText(DESTPATH);
             using (JsonTextWriter writer = new JsonTextWriter(file))
