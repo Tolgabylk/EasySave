@@ -7,7 +7,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using System.Xml.Linq;
+
 using static EasySave_v1._0._0.Enums;
 
 namespace EasySave_v1._0._0
@@ -39,7 +39,7 @@ namespace EasySave_v1._0._0
             DesthPath = desthPath;
             FileSize = fileSize;
             FileTransferTime = fileTransferTime;
-            
+
         }
 
         public DailyLog() { }
@@ -47,67 +47,85 @@ namespace EasySave_v1._0._0
         #endregion Constructors
 
         #region Methods
-        public void GenerateLogDailyJSON() 
+        public void GenerateLogDailyJSON()
         {
             JObject DataForLog = new JObject(new JProperty("Name", this.Name), new JProperty("FileSource", this.FileSource), new JProperty("FileTarget", this.FileTarget), new JProperty("Destpath", this.DesthPath), new JProperty("FileSize", this.FileSize), new JProperty("FileTransferTime", this.FileTransferTime), new JProperty("Time", this.TIME));
             JArray array = new JArray(DataForLog);
-            PrepareWriteLog(array, EXTENSION.JSON.ToString());
+            PrepareWriteLogJSON(array);
         }
-        public void GenerateLogDailyXML() 
+        public void GenerateLogDailyXML()
+        {
+            XmlDocument document = new XmlDocument();
+
+            // Créer le noeud racine
+            XmlElement root = document.CreateElement("DailyLog");
+            document.AppendChild(root);
+
+            // Créer le noeud DataForLog dans un document XML différent
+            XmlDocument tempDoc = new XmlDocument();
+            XmlElement DataForLog = tempDoc.CreateElement("DailyLog");
+            DataForLog.AppendChild(tempDoc.CreateElement("Name")).InnerText = this.Name;
+            DataForLog.AppendChild(tempDoc.CreateElement("FileSource")).InnerText = this.FileSource;
+            DataForLog.AppendChild(tempDoc.CreateElement("FileTarget")).InnerText = this.FileTarget;
+            DataForLog.AppendChild(tempDoc.CreateElement("Destpath")).InnerText = this.DesthPath;
+            DataForLog.AppendChild(tempDoc.CreateElement("FileSize")).InnerText = this.FileSize.ToString();
+            DataForLog.AppendChild(tempDoc.CreateElement("FileTransferTime")).InnerText = this.FileTransferTime.ToString();
+            DataForLog.AppendChild(tempDoc.CreateElement("Time")).InnerText = this.TIME;
+
+            // Importer le noeud DataForLog dans le document XML principal
+            XmlNode importedNode = document.ImportNode(DataForLog, true);
+            root.AppendChild(importedNode);
+
+            PrepareWriteLogXML(document);
+        }
+
+        public void PrepareWriteLogJSON(JArray DataForLog)
         {
 
-            XElement DataForLog = new XElement(new JProperty("Name", this.Name), new JProperty("FileSource", this.FileSource), new JProperty("FileTarget", this.FileTarget), new JProperty("Destpath", this.DesthPath), new JProperty("FileSize", this.FileSize), new JProperty("FileTransferTime", this.FileTransferTime), new JProperty("Time", this.TIME));
-            JArray array = new JArray(DataForLog);
-            PrepareWriteLog(array, EXTENSION.XML.ToString());
-        }
+            if (!Directory.Exists(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/")))
+            {
+                Directory.CreateDirectory(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/"));
+            }
+            else
+            {
+                if (!File.Exists(LOGDESTPATH + "json"))
+                {
+                    File.Create(LOGDESTPATH + "json");
+                }
+            }
 
-        public void PrepareWriteLog(JArray DataForLog, string extension)
+            File.WriteAllText(DESTPATH, DataForLog.ToString());
+
+            StreamWriter file = File.CreateText(DESTPATH);
+            using (JsonTextWriter writer = new JsonTextWriter(file))
+            {
+                DataForLog.WriteTo(writer);
+            }
+        }
+        public void PrepareWriteLogXML(XmlDocument DataForLog)
         {
-            if (extension == EXTENSION.JSON.ToString())
+
+            if (!Directory.Exists(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/")))
             {
-                if (!Directory.Exists(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/")))
+                Directory.CreateDirectory(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/"));
+            }
+            else
+            {
+                if (!File.Exists(LOGDESTPATH + "xml"))
                 {
-                    Directory.CreateDirectory(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/"));
-                }
-                else
-                {
-                    if (!File.Exists(LOGDESTPATH+"json"))
-                    {
-                        File.Create(LOGDESTPATH+"json");
-                    }
-                }
-
-                File.WriteAllText(DESTPATH, DataForLog.ToString());
-
-                StreamWriter file = File.CreateText(DESTPATH);
-                using (JsonTextWriter writer = new JsonTextWriter(file))
-                {
-                    DataForLog.WriteTo(writer);
+                    File.Create(LOGDESTPATH + "xml");
                 }
             }
-            else if (extension == EXTENSION.XML.ToString())
-            {
-                if (!Directory.Exists(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/")))
-                {
-                    Directory.CreateDirectory(Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/"));
-                }
-                else
-                {
-                    if (!File.Exists(LOGDESTPATH+"xml"))
-                    {
-                        File.Create(LOGDESTPATH+"xml");
-                    }
-                }
 
-                File.WriteAllText(DESTPATH, DataForLog.ToString());
+            File.WriteAllText(LOGDESTPATH+"xml", DataForLog.InnerXml);
 
-                StreamWriter file = File.CreateText(DESTPATH);
-                XmlTextWriter writer = new XmlTextWriter(file);
+            StreamWriter file = File.CreateText(DESTPATH);
+            XmlTextWriter writer = new XmlTextWriter(file);
 
-                //DataForLog.WriteTo(writer);
+            DataForLog.WriteTo(writer);
 
-            }
         }
+
         #endregion Methods
     }
 }
