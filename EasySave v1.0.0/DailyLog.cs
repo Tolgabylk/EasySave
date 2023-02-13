@@ -25,7 +25,7 @@ namespace EasySave_v1._0._0
         //Readonly properties
         public readonly string TIME = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
 
-        public readonly string DESTPATH = Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/state.json");
+        public readonly string DESTPATH = Path.Combine(Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory), "/EasySaveLog/Daily.XML");
 
         public readonly string LOGDESTPATH = "C:/EasySaveLog/daily.";
         #endregion Properties 
@@ -115,14 +115,25 @@ namespace EasySave_v1._0._0
                 {
                     File.Create(LOGDESTPATH + "xml");
                 }
+                else
+                {
+
+                    // Ouvre le fichier en mode écriture
+                    FileStream fileStream = File.Open(LOGDESTPATH + "xml", FileMode.Open, FileAccess.Write);
+
+                    // Crée un flux d'écriture pour écrire dans le fichier
+                    XmlWriterSettings settings = new XmlWriterSettings();
+                    settings.Indent = true;
+                    XmlWriter xmlWriter = XmlWriter.Create(fileStream, settings);
+                 
+                    DataForLog.Save(xmlWriter);
+
+                    // Ferme le flux d'écriture et le fichier
+                    xmlWriter.Close();
+                    fileStream.Close();
+
+                }
             }
-
-            File.WriteAllText(LOGDESTPATH+"xml", DataForLog.InnerXml);
-
-            StreamWriter file = File.CreateText(DESTPATH);
-            XmlTextWriter writer = new XmlTextWriter(file);
-
-            DataForLog.WriteTo(writer);
 
         }
 
