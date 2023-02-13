@@ -1,0 +1,9 @@
+C:\Users\tbeylik\source\repos\Github\EasySave v1.0.0\obj\Debug\EasySave v1.0.0.csproj.AssemblyReference.cache
+C:\Users\tbeylik\source\repos\Github\EasySave v1.0.0\obj\Debug\EasySave v1.0.0.csproj.CoreCompileInputs.cache
+C:\Users\tbeylik\source\repos\Github\EasySave v1.0.0\bin\Debug\EasySave v1.0.0.exe
+C:\Users\tbeylik\source\repos\Github\EasySave v1.0.0\bin\Debug\EasySave v1.0.0.pdb
+C:\Users\tbeylik\source\repos\Github\EasySave v1.0.0\bin\Debug\Newtonsoft.Json.dll
+C:\Users\tbeylik\source\repos\Github\EasySave v1.0.0\bin\Debug\Newtonsoft.Json.xml
+C:\Users\tbeylik\source\repos\Github\EasySave v1.0.0\obj\Debug\EasySave v1.0.0.csproj.CopyComplete
+C:\Users\tbeylik\source\repos\Github\EasySave v1.0.0\obj\Debug\EasySave v1.0.0.exe
+C:\Users\tbeylik\source\repos\Github\EasySave v1.0.0\obj\Debug\EasySave v1.0.0.pdb
