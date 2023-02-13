@@ -30,16 +30,16 @@ namespace EasySave_v1._0._0
 
         #region Constructors
 
-        public StateLog(string name, string sourcefilepath, string targetfilepath, string state, int totalfilestocopy, int totalfilesleft, int nbFilesToDo, int progression)
+        public StateLog(string name, string sourcefilepath, string targetfilepath, string state)
         {
             Name = name;
             SourceFilePath = sourcefilepath;
             TargetFilePath = targetfilepath;
             LogState = state;
-            TotalFilesToCopy = totalfilestocopy;
-            TotalFileLeft = totalfilesleft;
-            NbFileTodo = nbFilesToDo;
-            Progression = progression;
+            TotalFilesToCopy = FileLeft(SourceFilePath);
+            TotalFileLeft = FileLeft(SourceFilePath) - 1;
+            NbFileTodo = FileLeft(SourceFilePath);
+            Progression = 1;
         }
 
         public StateLog()
@@ -147,7 +147,6 @@ namespace EasySave_v1._0._0
             TotalFileLeft = nbFichiers - 1;
             return nbFichiers;
         }
-
         #endregion Methods
     }
 
